@@ -1,56 +1,26 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import EventCard from '@/components/EventCard.vue'
+import eventService from '@/services/EventService'
+import { ref } from 'vue'
+import type { Event } from '@/types'
 
-const events = ref([
-  {
-    id: 1,
-    category: 'Category 1',
-    title: 'Event 1',
-    description: 'Description of Event 1',
-    date: '2021-10-10',
-    time: '10:00',
-    location: 'Location 1',
-    petsAllowed: true,
-    organizer: {
-      name: 'Organizer 1',
-    },
-  },
-  {
-    id: 2,
-    category: 'Category 2',
-    title: 'Event 2',
-    description: 'Description of Event 2',
-    date: '2021-10-11',
-    time: '11:00',
-    location: 'Location 2',
-    petsAllowed: false,
-    organizer: {
-      name: 'Organizer 2',
-    },
-  },
-  {
-    id: 3,
-    category: 'Category 3',
-    title: 'Event 3',
-    description: 'Description of Event 3',
-    date: '2021-10-12',
-    time: '12:00',
-    location: 'Location 3',
-    petsAllowed: true,
-    organizer: {
-      name: 'Organizer 3',
-    },
-  },
-])
+const events = ref<Event[]>([])
+
+interface EventResponse {
+  data: Event[]
+}
+
+eventService.getEvents().then((response: EventResponse) => {
+  events.value = response.data
+})
 </script>
 
 <template>
-  <h1>Events For Good</h1>
   <div class="events">
     <EventCard v-for="event in events" :key="event.id" :event="event" />
   </div>
 </template>
+
 <style scoped>
 .events {
   display: flex;
