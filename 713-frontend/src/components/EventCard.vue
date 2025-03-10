@@ -1,17 +1,19 @@
-<script setup lang="ts">
-import type { Event } from '@/types'
-defineProps<{ event: Event }>()
-</script>
-
 <template>
-  <RouterLink :to="`/event/${event.id}`">
+  <RouterLink class="event-link" :to="{ name: 'event-detail-view', params: { id: event.id } }">
     <div class="event-card">
       <h2>{{ event.title }}</h2>
-      <p>{{ event.description }} </p>
+      <p>{{ event.description }}</p>
       <span>@{{ event.time }} on {{ event.date }}</span>
     </div>
   </RouterLink>
 </template>
+
+<script setup lang="ts">
+import { defineProps } from 'vue'
+import type { Event } from '@/types'
+
+defineProps<{ event: Event }>()
+</script>
 
 <style scoped>
 .event-card {
@@ -24,5 +26,9 @@ defineProps<{ event: Event }>()
 .event-card:hover {
   transform: scale(1.01);
   box-shadow: 0 3px 12px 0 rgba(0, 0, 0, 0.2);
+}
+.event-link {
+  text-decoration: none;
+  color: inherit;
 }
 </style>

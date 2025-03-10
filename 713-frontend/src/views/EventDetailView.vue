@@ -1,19 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import type { Event } from '@/types'
 import eventService from '@/services/EventService'
 
 const event = ref<Event>()
-const id = ref<number>(1) // Replace with the actual ID you want to fetch
+const route = useRoute()
 
-eventService
-  .getEvent(id.value)
-  .then((response) => {
-    event.value = response.data
-  })
-  .catch((error) => {
-    console.error('There was an error!', error)
-  })
+onMounted(() => {
+  const id = Number(route.params.id)
+  eventService
+    .getEvent(id)
+    .then((response) => {
+      event.value = response.data
+    })
+    .catch((error) => {
+      console.error('There was an error!', error)
+    })
+})
 </script>
 
 <template>
