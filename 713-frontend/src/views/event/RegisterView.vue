@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { toRefs } from 'vue'
 import { useRouter } from 'vue-router'
+import { useMessageStore } from '@/stores/message'
 import type { Event } from '@/types'
 
 const props = defineProps<{
@@ -8,15 +9,16 @@ const props = defineProps<{
   id: string
 }>()
 
-// Extract the event prop
+const store = useMessageStore()
 const { event } = toRefs(props)
-
-// Use the Vue Router instance
 const router = useRouter()
 
-// Function to handle registration and navigate to the event detail
 const register = () => {
-  router.push({ name: 'event-detail-view', params: { id: props.id } })
+  store.updateMessage('You are successfully registered for ' + props.event.title)
+  setTimeout(() => {
+    store.resetMessage()
+  }, 3000)
+  router.push({ name: 'event-detail-view' })
 }
 </script>
 
