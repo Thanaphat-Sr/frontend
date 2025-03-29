@@ -1,20 +1,38 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Event } from '@/types'
 import eventService from '@/services/EventService'
 
 const events = ref<Event[]>([])
-const router = useRouter()
+const totalEvents = ref(0)
+const hasNextPage = computed(() => {
+  const totalPages = Math.ceil(totalEvents.value / 3)
+  return page.value < totalPages
+})
 
-eventService
-  .getEvents()
-  .then((response) => {
-    events.value = response.data
-  })
-  .catch(() => {
-    router.push({ name: 'network-error-view' })
-  })
+interface Props {
+  page: number
+}
+
+const props = defineProps<Props>()
+const page = computed(() => props.page)
+
+watchEffect(() => {
+  eventService
+    .getEvents(page.value, 3)
+    .then((response) => {
+      events.value = response.data
+      totalEvents.value = response.headers['x-total-count']
+    })
+    .catch(() => {
+      router.push({ name: 'network-error-view' })
+    })
+})
+
+eventService.getEvents(page.value, 3).then((response) => {
+  events.value = response.data
+})
 </script>
 
 <template>
@@ -27,5 +45,6 @@ eventService
         </router-link>
       </li>
     </ul>
+    <button v-if="hasNextPage" @click="$emit('next-page')">Next Page</button>
   </div>
 </template>

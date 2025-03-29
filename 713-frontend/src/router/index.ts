@@ -1,6 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useEventStore } from '@/stores/event'
-import nProgress from 'nprogress'
 import EventListView from '@/views/EventListView.vue'
 import EventLayoutView from '@/views/event/LayoutView.vue'
 import EventDetailView from '@/views/event/DetailView.vue'
@@ -8,7 +6,6 @@ import EventRegisterView from '@/views/event/RegisterView.vue'
 import EventEditView from '@/views/event/EditView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import NetworkErrorView from '@/views/NetworkErrorView.vue'
-import eventService from '@/services/EventService'
 
 const routes = [
   {
@@ -24,25 +21,6 @@ const routes = [
     name: 'event-layout-view',
     component: EventLayoutView,
     props: true,
-    beforeEnter: (to) => {
-      const id = parseInt(to.params.id as string)
-      const eventStore = useEventStore()
-      return eventService
-        .getEvent(id)
-        .then((response) => {
-          eventStore.setEvent(response.data)
-        })
-        .catch((error) => {
-          if (error.response && error.response.status === 404) {
-            return {
-              name: '404-resource-view',
-              params: { resource: 'event' },
-            }
-          } else {
-            return { name: 'network-error-view' }
-          }
-        })
-    },
     children: [
       {
         path: '',
@@ -85,15 +63,13 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-})
-
-// Add nProgress hooks for route changes
-router.beforeEach(() => {
-  nProgress.start()
-})
-
-router.afterEach(() => {
-  nProgress.done()
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { top: 0 }
+    }
+  },
 })
 
 export default router
