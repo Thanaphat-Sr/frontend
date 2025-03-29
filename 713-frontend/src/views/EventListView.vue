@@ -1,83 +1,31 @@
 <script setup lang="ts">
-import EventCard from '@/components/EventCard.vue'
-import eventService from '@/services/EventService'
-import { ref, computed, watchEffect } from 'vue'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import type { Event } from '@/types'
+import eventService from '@/services/EventService'
 
 const events = ref<Event[]>([])
-  const totalEvents = ref(0)
+const router = useRouter()
 
-interface Props {
-  page: number
-}
-const props = defineProps<Props>()
-const page = computed(() => props.page)
-
-const hasNextPage = computed(() => {
-  const totalPages = Math.ceil(totalEvents.value / 2)
-  return page.value < totalPages
-})
-
-watchEffect(() => {
-  eventService
-    .getEvents(page.value, 2)
-    .then((response) => {
-      events.value = response.data
-      totalEvents.value = response.headers['x-total-count']
-    })
-    .catch((error) => {
-      console.error('There was an error!', error)
-    })
-})
-
-eventService.getEvents(page.value, 2).then((response) => {
-   events.value = response.data
-})
+eventService
+  .getEvents()
+  .then((response) => {
+    events.value = response.data
+  })
+  .catch(() => {
+    router.push({ name: 'network-error-view' })
+  })
 </script>
 
 <template>
-  <div class="events">
-    <EventCard v-for="event in events" :key="event.id" :event="event" />
-    <div class="pagination">
-      <RouterLink
-        id="page-prev"
-        :to="{ name: 'event-list-view', query: { page: page - 1 } }"
-        rel="prev"
-        v-if="page != 1"
-        >Prev Page</RouterLink
-      >
-      <RouterLink
-        id="page-next"
-        :to="{ name: 'event-list-view', query: { page: page + 1 } }"
-        rel="next"
-        v-if="hasNextPage"
-        >Next Page</RouterLink
-      >
-    </div>
+  <div>
+    <h1>Event List</h1>
+    <ul>
+      <li v-for="event in events" :key="event.id">
+        <router-link :to="{ name: 'event-detail-view', params: { id: event.id } }">
+          {{ event.title }}
+        </router-link>
+      </li>
+    </ul>
   </div>
 </template>
-
-<style scoped>
-.events {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.pagination {
-  display: flex;
-  width: 290px;
-}
-.pagination a {
-  flex: 1;
-  text-decoration: none;
-  color: #2c3e50;
-}
-
-#page-prev {
-  text-align: left;
-}
-
-#page-next {
-  text-align: right;
-}
-</style>
